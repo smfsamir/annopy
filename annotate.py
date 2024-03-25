@@ -114,7 +114,9 @@ def annotate_frame(frame: pl.DataFrame, num_samples,
     finally:
         subset_frame = pl.DataFrame(subset_annotation_map)
         result_frame = update_annotations(frame, subset_frame)
-        # result_frame.write_csv(csv_save_path)
+        # log the number of non-tbd annotations, out of the total number of annotations
+        logger.info(f"Number of non-tbd annotations: {len(result_frame.filter(pl.col('fact_in_tgt') != 'tbd'))} out of {len(result_frame)}")
+        # result_frame.write_json(csv_save_path)
         # return all columns except the index column
         return result_frame.drop('index')
         # return result_frame 
@@ -122,7 +124,7 @@ def annotate_frame(frame: pl.DataFrame, num_samples,
 def load_save_if_nexists(df: pl.DataFrame, path: str):
         # save the en_intersection_contexts and fr_intersection_contexts as a string by joining with a newline
         if (not os.path.exists(path)):
-            df.write_csv(path)
+            df.write_json(path)
         else:
             # df = pl.read_csv(path)
             # ask the user if we should overwrite the file
@@ -131,7 +133,7 @@ def load_save_if_nexists(df: pl.DataFrame, path: str):
                 # ask the user if they are sure
                 overwrite = input(f"Are you sure you want to overwrite {path}? (y/n): ")
                 if overwrite == 'y':
-                    df.write_csv(path)
+                    df.write_json(path)
             else:
-                df = pl.read_csv(path)
+                df = pl.read_json(path)
         return df
